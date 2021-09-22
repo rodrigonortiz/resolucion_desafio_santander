@@ -23,12 +23,142 @@ En el caso de que nuestro modelo deba ser creado en otro ecosistema diferente al
 ![Untitled Diagram](https://user-images.githubusercontent.com/87278509/134350546-71049f35-7a99-477e-b9ce-e26cfdccd4bb.jpg)
 
 
+### Ejercicio 1
+
 ### Creacion del modelo requerido por banca privada.
 
-A fines practicos de realizar el modelo y mostrar el flujo de SQL lo voy a hacer montando una base de datos local MySQL, en donde crearemos las siguientes tablas:
+A fines practicos de realizar el modelo y mostrar el flujo de SQL lo voy a hacer montando una base de datos local MySQL en donde crearemos las siguientes tablas:
 
 ● <strong> SESSIONS_TABLE </strong>  la cual sera la encargada de emular todos los datos de sesiones que va a contener nuestra tabla en Bigquery.
 
 ● <strong> FIRST_USER_LOG </strong> contiene los datos del primer logueo de cada usuario.
 
 ● <strong> DAILY_USERS_ACTIVITY </strong> contiene la actividad diaria de cada usuario.
+
+Nuestro diagrama entidad-relacion quedaria de la siguiente manera:
+
+### Ejercicio 2
+
+#### Creamos la primera tabla llamada SESSIONS_TABLE, la cual va a tener la informacion cruda sobre los usuarios y sus sesiones, la misma tendra como PRIMARY KEY los campos <strong>USER_ID</strong> y <strong>SESSION_ID</strong>
+
+<code> 
+  CREATE TABLE SESSIONS_TABLE (
+    USER_ID  NUMERIC(38,0) NOT NULL,
+    SESSION_ID NUMERIC(38,0) NOT NULL,
+    SEGMENT_ID NUMERIC(10,0),
+    SEGMENT_DESCRIPTION VARCHAR(100),
+    USER_CITY VARCHAR(50),
+    SERVER_TIME TIMESTAMP,
+    DEVICE_BROWSER VARCHAR(10),
+    DEVICE_OS VARCHAR(5),
+    DEVICE_MOBILE VARCHAR(10),
+    TIME_SPENT NUMERIC(38,0),
+    EVENT_ID NUMERIC(38,0),
+    EVENT_DESCRIPTION VARCHAR(50),
+    CRASH_DETECTION VARCHAR(100),
+    PRIMARY KEY (USER_ID, SESSION_ID)
+);
+</code>
+
+<br></br>
+
+#### Seguido creamos la tabla para mostrar primer logueo de cada usuario con los mismos PRIMARY KEY que SESSIONS_TABLE
+
+<code>
+  CREATE TABLE  FIRST_USER_LOG (
+    USER_ID NUMERIC(38,0) NOT NULL,
+    SESSION_ID NUMERIC(38,0) NOT NULL,
+    FIRST_DATE TIMESTAMP,
+    PRIMARY KEY (USER_ID, SESSION_ID),
+    FOREIGN KEY (USER_ID, SESSION_ID) REFERENCES SESSIONS_TABLE(USER_ID, SESSION_ID) ON DELETE CASCADE
+);
+</code>
+
+
+<br></br>
+
+#### Por ultimo creamos la tabla de actividad diaria para cada usuario
+
+<code>
+  CREATE TABLE DAILY_USERS_ACTIVITY (
+    ACTIVITY_DATE TIMESTAMP,
+    USER_ID NUMERIC(38) NOT NULL,
+    SESSION_ID NUMERIC(38,0) NOT NULL,
+    EVENT_ID NUMERIC(38,0),
+    TIME_SPENT NUMERIC(38,0),
+    PRIMARY KEY (USER_ID, SESSION_ID),
+    FOREIGN KEY (USER_ID, SESSION_ID) REFERENCES SESSIONS_TABLE(USER_ID, SESSION_ID) ON DELETE CASCADE
+);
+</code>
+
+<br></br>
+
+#### Ahora generamos los insert correspondientes para poblar las tablas:
+Aclaracion: Para poblar la tabla SESSIONS_USER se insertaran multiples registros, el codigo esta adjunto en el repo.
+
+<br></br>
+FIRST_USER_LOG se construira agrupando por cada usuario y extrayendo la minima fecha de logueo.
+
+<code>
+INSERT INTO FIRST_USER_LOG (USER_ID, SESSION_ID, FIRST_DATE)
+SELECT A.USER_ID, A.SESSION_ID, B.FECHA_PRIMER_LOGUEO 
+FROM SESSIONS_TABLE A
+INNER JOIN 
+(
+SELECT 
+    USER_ID, MIN(SERVER_TIME) AS FECHA_PRIMER_LOGUEO FROM SESSIONS_TABLE WHERE EVENT_ID = 01
+GROUP BY USER_ID
+) B
+ON A.SERVER_TIME = B.FECHA_PRIMER_LOGUEO
+</code>  
+  
+<br></br>
+
+En DAILY_USERS_ACTIVITY se agrupara por dia, usuario, sesion y evento y se sumara su TIME_SPENT.
+
+<code>
+INSERT INTO DAILY_USERS_ACTIVITY (ACTIVITY_DATE, USER_ID, SESSION_ID, EVENT_ID, TIME_SPENT)
+SELECT DATE(SERVER_TIME) AS DIA, USER_ID, SESSION_ID, EVENT_ID,  SUM(TIME_SPENT) AS TIME_SPENT
+FROM SESSIONS_TABLE
+GROUP BY DIA, USER_ID, SESSION_ID, EVENT_ID
+</code> 
+
+<br></br>
+
+### Ejercicio 3
+
+Para obtener el KPI de retención de clientes para los 10 clientes que mas veces se hayan logueado en el último mes calcularemos la diferencia entre fechas de logueo para cada usuario y nos quedaremos con aquellos en los que esta diferencia sea >=1 lo que nos dice que ha pasado un dia desde el logueo anterior, por ende fueron dos ingresos en dos dias consecutivos, filtrando los 10 primeros clientes que mas se loguearon en el mes.
+
+<code>
+  SELECT t.USER_ID,
+t.SERVER_TIME, 
+DATEDIFF(t.SERVER_TIME, LAG(t.SERVER_TIME) OVER (PARTITION BY t.USER_ID)) as DIFF
+FROM SESSIONS_TABLE t 
+WHERE t.EVENT_ID <> 01 
+AND TIME_SPENT > 300
+AND t.USER_ID IN 
+(SELECT a.USER_ID FROM (SELECT USER_ID, COUNT(*) AS CANT FROM SESSIONS_TABLE WHERE EVENT_ID = 01
+GROUP BY USER_ID ORDER BY CANT DESC LIMIT 10) a);
+</code> 
+  
+ <br></br>
+  
+  ### Pregunta 2
+  
+  En una ingesta con spark cosidero necesario prestar atencion a los siguientes parametros:
+  
+  ● <strong> num-executors </strong>: Este parámetro se usa para establecer el número total de procesos executor usados por el job de Spark, si no está configurado solo arrancaran una poca cantidad de procesos executor de forma predeterminada y la velocidad de ejecución del proceso puede ser bastante lenta.
+  
+   ● <strong> executor-memory </strong>: Se utiliza para configurar la memoria de cada proceso executor, esta memoria es determinante en el rendimiento del proceso y si es insuficiente nos va a dar errores de JVM.
+  
+  ● <strong> executor-cores </strong>: Se utiliza para establecer el número de núcleos para cada proceso executor. Este parámetro determina la capacidad de cada proceso executor para ejecutar tareas en paralelo.
+  
+  #### Formato de compresion recomendado:
+  
+  Parquet es una opcion que elegiria ya que nos permite ser flexibles a la hora de agregar campos a nuestro set de datos a futuro, es una buena opcion si los datos los consumiran los data scientist del equipo ya que las consultas al mismo son rapidas, otra cosa a tener en cuenta es que nos permite particionar los datos por ejemple para nuestro caso seria ideal que los .parquet de la actividad de cada usuario esten particionados en fechas con un campo cutoff_date.
+  
+ ### Pregunta 3
+  
+  #### Implementaciones que pueden mejorar la calidad de nuestros datos:
+  
+  ● <strong> </strong>:
