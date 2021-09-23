@@ -172,6 +172,15 @@ GROUP BY USER_ID ORDER BY CANT DESC LIMIT 10) a);
 
   ### PREGUNTAS:
 
-  En qué requerimiento implementarías una cola de mensajes en una solución orientada a datos? Que lenguaje utilizarías y porque? 
+  #### En qué requerimiento implementarías una cola de mensajes en una solución orientada a datos? Que lenguaje utilizarías y porque? 
   
   ● Una cola de mensajes es una solucion para un desarrollo cuando tenemos que trabajar con datos en real time, va muy de la mano con el concepto de topico, pueden existir muchos flujos de datos que vengan al mismo tiempo pero en topicos diferentes de acuerdo a la tematica de cada uno, por ejemplo tenemos que trabajar con datos en tiempo real sobre transacciones de tarjeta de debito y credito que los usuarios del banco estan realizando en todo momento, en un topico pondriamos transacciones de debito y en otro las de credito, asi podemos diferenciar los dos flujos de datos y moverlos en canalizaciones diferentes, la tecnologia que prefiero es KAFKA ya que contiene un API para python muy sencillo de usar, y como todo en python, es facil de aprender.
+  
+ #### Que experiencia posees sobre py spark o spark scala? Contar breves experiencias, en caso de contar experiencia con otro framework de procesamiento distribuido, dar detalles también.
+  
+  ● Actualmente me encuentro trabajando para el banco BBVA en donde realizamos desarrollos en notebooks con pyspark preparando data para alimentar modelos de segmentacion de clientes, mas precisamente hoy me encuentro en el area de kpis no financieros calculando saldos medios de clientes, una vez terminado nuestro notebook lo enviamos al sector en donde personas se encargaran de poner el codigo en produccion mediante jobs en una herramienta llamada scaffolder previa validacion QA.
+  
+  #### Qué funcionalidad podrías expandir desde el area de ingeniería de datos con una API y arquitectónicamente como lo modelarías?
+  
+  ● 
+  
