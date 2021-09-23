@@ -191,5 +191,5 @@ GROUP BY USER_ID ORDER BY CANT DESC LIMIT 10) a);
   ![image](https://user-images.githubusercontent.com/87278509/134450340-997d22ce-e035-4c15-acfa-df6a1c2150ae.png)
 
   Esto ofrecería los siguientes beneficios principales: Los ajustes deben aplicarse en una sola capa / entorno en vez de modificar muchos procesos etls dispersos , reduce la sobrecarga y ofrece un único punto de verdad que puede ser utilizado por todo aquel que lo requiera. Tambien aplicaciones pueden conectarse ya que se utiliza formato JSON. Esto es un ejemplo sencillo, prealizar un cambio como este, hay muchos otros factores a tener en cuenta, como el volumen de datos, la velocidad de conexión, etc. 
- Esta solución puede no ser tecnicamente viable en todas las situaciones y debe analizarse y discutirse.
+ Esta solución puede no ser tecnicamente viable en todas las situaciones y debe analizarse y discutirse. 
   
