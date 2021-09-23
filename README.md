@@ -182,5 +182,8 @@ GROUP BY USER_ID ORDER BY CANT DESC LIMIT 10) a);
   
   #### Qué funcionalidad podrías expandir desde el area de ingeniería de datos con una API y arquitectónicamente como lo modelarías?
   
-  ● 
+  ● Podriamos construir una API que se encarge de disponibilizar los datos de una forma mas sencilla y rapida al area que lo desee, actualmente trabajamos creando pipelines de datos, que parte de una fuente y se canalizan en un proceso de ETL para luego depositar los mismos en un datawarehouse o aplicaciones de reporting de BI, como lo muestra el siguiente esquema:
+  
+  ![image](https://user-images.githubusercontent.com/87278509/134449858-cd20e6f9-33c5-48df-ab0c-9fa815cdbf2d.png)
+
   
