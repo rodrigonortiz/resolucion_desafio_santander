@@ -161,4 +161,17 @@ GROUP BY USER_ID ORDER BY CANT DESC LIMIT 10) a);
   
   #### Implementaciones que pueden mejorar la calidad de nuestros datos:
   
-  ● <strong> </strong>:
+  ● <strong>Identificar los requisitos comerciales</strong>: Diseñar el modelo de datos en conjunto con el area en particular que lo requiere, esto nos ayudara a que el alcance del proyecto este bien definido de antemano, documentado y entendido sobre los datos que tenemos que construir.
+  
+  ● <strong>Validar las fuentes de datos</strong>: Verificar que el tipo de datos de la tabla y las columnas cumplan con las especificaciones del modelo de datos, chequear si existen datos duplicados o errores en claves importates que puedan repercutir en el futuro del proceso de ETL.
+  
+  ● <strong>Diseñar casos de prueba (qa)</strong>: IMPORTANTISIMO, nuestro codigo se va a ver mejor modularizado y ademas esto va a ayudarnos a que podamos crear casos de prueba para transformaciones que tengan cierta complejidad, por ejemplo en python hay frameworks que pueden ayudarnos con esto.
+  
+  ● <strong>Chequear el destino final de los datos</strong>: Es importante hacer un recuento de la cantidad de datos en nuestra tabla destino, es necesario realizar agrupaciones y agregaciones sobre los mismos para chequear que los valores sean los correctos en cada campo, cada periodo de fechas, etc.
+  
+
+  ### PREGUNTAS:
+
+  En qué requerimiento implementarías una cola de mensajes en una solución orientada a datos? Que lenguaje utilizarías y porque? 
+  
+  ● Una cola de mensajes es una solucion para un desarrollo cuando tenemos que trabajar con datos en real time, va muy de la mano con el concepto de topico, pueden existir muchos flujos de datos que vengan al mismo tiempo pero en topicos diferentes de acuerdo a la tematica de cada uno, por ejemplo tenemos que trabajar con datos en tiempo real sobre transacciones de tarjeta de debito y credito que los usuarios del banco estan realizando en todo momento, en un topico pondriamos transacciones de debito y en otro las de credito, asi podemos diferenciar los dos flujos de datos y moverlos en canalizaciones diferentes, la tecnologia que prefiero es KAFKA ya que contiene un API para python muy sencillo de usar, y como todo en python, es facil de aprender.
