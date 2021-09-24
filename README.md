@@ -131,18 +131,26 @@ GROUP BY DIA, USER_ID, SESSION_ID, EVENT_ID
 
 ### Ejercicio 3
 
-Para obtener el KPI de retención de clientes para los 10 clientes que mas veces se hayan logueado en el último mes calcularemos la diferencia entre fechas de logueo para cada usuario y nos quedaremos con aquellos en los que esta diferencia sea >=1 lo que nos dice que ha pasado un dia desde el logueo anterior, por ende fueron dos ingresos en dos dias consecutivos, filtrando los 10 primeros clientes que mas se loguearon en el mes.
+Para obtener el KPI de retención de clientes para los 10 clientes que mas veces se hayan logueado en el último mes calcularemos la diferencia entre fechas de logueo para cada usuario y nos quedaremos con aquellos en los que esta diferencia sea >=1 lo que nos dice que ha pasado un dia desde el logueo anterior filtrando aquellas sesiones con time_spent >= 300, luego uniremos con join este resultado con la lista de top 10 clientes que mas se loguearon, por ultimo para calular el kpi en porcentaje queda la siguiente operacion: cantidad de usuarios frecuentes / cantidad de usuarios top 10 que se loguean.
 
 <code>
-  SELECT t.USER_ID,
+SELECT SUM(COALESCE(freq_users.FREQUENT_USER,0)) / COUNT(*) AS PORCENTAJE_FREC_TOP 
+FROM 
+(SELECT USER_ID, COUNT(*) AS CANT FROM SESSIONS_TABLE WHERE EVENT_ID = 01
+GROUP BY USER_ID ORDER BY CANT DESC LIMIT 10) top_users
+LEFT JOIN 
+(SELECT DISTINCT(b.USER_ID) as USER_ID, 1 AS FREQUENT_USER
+FROM
+(
+SELECT t.USER_ID,
 t.SERVER_TIME, 
-DATEDIFF(t.SERVER_TIME, LAG(t.SERVER_TIME) OVER (PARTITION BY t.USER_ID)) as DIFF
+DATEDIFF(t.SERVER_TIME, LAG(t.SERVER_TIME, 1) OVER (PARTITION BY t.USER_ID  ORDER BY t.SERVER_TIME )) as DIFF
 FROM SESSIONS_TABLE t 
 WHERE t.EVENT_ID <> 01 
-AND TIME_SPENT > 300
-AND t.USER_ID IN 
-(SELECT a.USER_ID FROM (SELECT USER_ID, COUNT(*) AS CANT FROM SESSIONS_TABLE WHERE EVENT_ID = 01
-GROUP BY USER_ID ORDER BY CANT DESC LIMIT 10) a);
+AND TIME_SPENT >= 300
+) b
+WHERE b.DIFF >=1)  freq_users
+on top_users.USER_ID = freq_users.USER_ID
 </code> 
   
  <br></br>
