@@ -1,5 +1,3 @@
-#%%
-
 #Realizado en Python 2.7.16
 
 import pandas as pd
