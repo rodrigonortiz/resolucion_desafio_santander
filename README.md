@@ -37,6 +37,10 @@ A fines practicos de realizar el modelo y mostrar el flujo de SQL lo voy a hacer
 
 Nuestro diagrama entidad-relacion quedaria de la siguiente manera:
 
+
+![image](https://user-images.githubusercontent.com/87278509/134666751-afdc36f2-e4f5-4e73-ba69-1e1177c71f5b.png)
+
+
 ### Ejercicio 2
 
 #### Creamos la primera tabla llamada SESSIONS_TABLE, la cual va a tener la informacion cruda sobre los usuarios y sus sesiones, la misma tendra como PRIMARY KEY los campos <strong>USER_ID</strong> y <strong>SESSION_ID</strong>
