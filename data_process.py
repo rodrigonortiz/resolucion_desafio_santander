@@ -65,6 +65,6 @@ def save_data(df):
 
 if __name__ == "__main__":
     datos = read_file(tsv_path)
-    sort_bad_values(datos)
+    datos = sort_bad_values(datos)
     save_data(datos)
 
